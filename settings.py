@@ -1,7 +1,7 @@
 from functools import cached_property, lru_cache
 
-from aiokafka import AIOKafkaProducer
-from elasticsearch import AsyncElasticsearch
+# from aiokafka import AIOKafkaProducer
+# from elasticsearch import AsyncElasticsearch
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from redis import Redis
