@@ -7,8 +7,8 @@ from starlette.websockets import WebSocketDisconnect
 
 from app.chat.schema import MessageChat
 from app.context import RequestContext, get_context, get_context_websocket, WebSocketContext
-from app.kafka_service import send_message
-from app.es_service import get_history
+# from app.kafka_service import send_message
+# from app.es_service import get_history
 from app.utils import create_response, ensure_uuid
 
 router = APIRouter()

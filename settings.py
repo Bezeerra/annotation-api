@@ -10,7 +10,7 @@ from redis import Redis
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    debug_mode: bool
+    debug_mode: bool = True
 
     #  data from .env file
     API_VERSION: str = "v1"
