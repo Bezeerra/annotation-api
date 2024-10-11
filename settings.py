@@ -24,14 +24,14 @@ class Settings(BaseSettings):
     REDIS_PORT: str = "6379"
     REDIS_PASSWORD: str
 
-    KAFKA_HOST: str
-    KAFKA_PORT: str
+    # KAFKA_HOST: str
+    # KAFKA_PORT: str
 
-    ELASTIC_USER: str
-    ELASTIC_PASSWORD: str
-    ELASTIC_DOMAIN: str
-    ELASTIC_PORT: str
-    INDEX_ES_CHAT: str
+    # ELASTIC_USER: str
+    # ELASTIC_PASSWORD: str
+    # ELASTIC_DOMAIN: str
+    # ELASTIC_PORT: str
+    # INDEX_ES_CHAT: str
 
     @cached_property
     def postgres_dsn(self):

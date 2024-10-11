@@ -52,3 +52,21 @@ async def remove_token(token: str, settings: Settings) -> str:
 
 async def get_user_by_token(token: str, settings: Settings) -> str:
     return settings.redis.get(token)
+
+
+def parser_rich_text(rich_text: dict | list, parsed_text=""):
+    if isinstance(rich_text, list):
+        for item in rich_text:
+            parsed_text = parser_rich_text(item, parsed_text)
+    elif isinstance(rich_text, dict):
+        if rich_text.get("type") == "text":
+            parsed_text += f" {rich_text.get('text')}"
+        if rich_text.get("root"):
+            parsed_text = parser_rich_text(rich_text["root"]["children"], parsed_text)
+        elif rich_text.get("children"):
+            parsed_text = parser_rich_text(rich_text["children"], parsed_text)
+    return parsed_text.strip()
+
+
+def get_full_text():
+    ...

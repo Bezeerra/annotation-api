@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import select, delete
 
 from app.func_db.utils import BaseFuncDB
-from app.utils import ensure_uuid
+from app.utils import ensure_uuid, parser_rich_text
 from models.annotation import Annotation
 
 
@@ -20,12 +20,14 @@ class AnnotationDB(BaseFuncDB):
     async def create_annotation(
         self,
         title: str,
-        text: str,
+        content: dict,
         user_id: str,
     ) -> Annotation:
+        full_text = parser_rich_text(content)
         annotation = Annotation(
             title=title,
-            text=text,
+            full_text=full_text,
+            content=content,
             user_id=ensure_uuid(user_id)
         )
         async with self.settings.session_db() as session:

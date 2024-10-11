@@ -13,7 +13,7 @@ router = APIRouter()
 async def create_annotation(schema: AddAnnotation, context: Annotated[RequestContext, Depends(get_context)]):
     annotation = await context.func_db.annotations.create_annotation(
         title=schema.title,
-        text=schema.text,
+        content=schema.text,
         user_id=schema.user_id
     )
     return await create_response(content=annotation.to_json())

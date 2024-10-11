@@ -7,7 +7,7 @@ from app.func_db.func_db import FuncDB
 class RequestContext:
     def __init__(self, request: Request, settings: Settings):
         user = getattr(request.state, "user", None)
-        self.settings = settings  # i think is better get the settings from the request.state set in the middleware
+        self.settings = settings  # I think is better get the settings from the request.state set in the middleware
         self.request = request
         self.user = user
         self.method = request.method
