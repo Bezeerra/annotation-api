@@ -10,7 +10,7 @@ from redis import Redis
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    debug_mode: bool = True
+    debug_mode: bool = False
 
     #  data from .env file
     API_VERSION: str = "v1"
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str
     REDIS_PORT: str = "6379"
-    REDIS_PASSWORD: str
+    # REDIS_PASSWORD: str
 
     # KAFKA_HOST: str
     # KAFKA_PORT: str
@@ -53,7 +53,7 @@ class Settings(BaseSettings):
             host=self.REDIS_HOST,
             port=self.REDIS_PORT,
             decode_responses=True,
-            password=self.REDIS_PASSWORD,
+            # password=self.REDIS_PASSWORD,
         )
 
     # @cached_property

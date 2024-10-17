@@ -1,0 +1,141 @@
+# name: CI-CD
+
+# on:
+#   push:
+#     branches: ["main"]
+
+# jobs:
+#   CI:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v4.2.1
+
+#     # Authenticate Docker to GCR
+#     - name: Authenticate to GCR
+#       run: |
+#         echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > ${{ runner.temp }}/gcloud.json
+#         gcloud auth activate-service-account --key-file=${{ runner.temp }}/gcloud.json
+#         gcloud --quiet auth configure-docker gcr.io
+
+#     # Build and push Docker images to GCR with both latest and run_number tags
+#     - name: Build and Push Docker Images to GCR
+#       uses: docker/build-push-action@v6.9.0
+#       with:
+#         file: Dockerfile
+#         push: true
+#         tags: |
+#           gcr.io/semiotic-joy-438622-r2/live-ci-cd:latest
+#           gcr.io/semiotic-joy-438622-r2/live-ci-cd:${{ github.run_number }}
+
+#     # - name: Autenticação docker hub
+#     #   uses: docker/login-action@v3.3.0
+#     #   with:
+#     #     username: ${{secrets.DOCKERHUB_USER}}
+#     #     password: ${{secrets.DOCKERHUB_PWD}}
+
+#     # - name: Construção da imagem docker
+#     #   uses: docker/build-push-action@v6.9.0
+#     #   with:
+#     #     file: Dockerfile
+#     #     push: true
+#     #     tags: bezerra01/live-ci-cd:${{github.run_number}}
+
+#   CD:
+#     runs-on: ubuntu-latest
+#     needs: [CI]
+#     steps:
+#     - uses: actions/checkout@v4.2.1
+#     - name: Set context for Kubernetes
+#       uses: Azure/k8s-set-context@v3.0
+#       with:
+#         method: kubeconfig
+#         kubeconfig: ${{ secrets.K8S_CONFIG }}
+
+#     # Install the gke-gcloud-auth-plugin
+#     # - name: Install gke-gcloud-auth-plugin
+#     #   run: |
+#     #     sudo apt-get update
+#     #     sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
+#     # - name: Deploy to Kubernetes cluster
+#     #   uses: Azure/k8s-deploy@v4.9
+#     #   with:
+#     #     images: gcr.io/semiotic-joy-438622-r2/live-ci-cd:${{ github.run_number }}
+#     #     manifests: |
+#     #       k8s.yml
+
+#         # Install Google Cloud SDK and gke-gcloud-auth-plugin
+#     - name: Install Google Cloud SDK
+#       run: |
+#         echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+#         sudo apt-get install -y apt-transport-https ca-certificates gnupg
+#         curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+#         sudo apt-get update && sudo apt-get install -y google-cloud-sdk
+
+#     # Enable the gke-gcloud-auth-plugin
+#     - name: Enable GKE Auth Plugin
+#       run: |
+#         gcloud components install gke-gcloud-auth-plugin
+#         export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+#     # Manually deploy with kubectl and pass --validate=false
+#     - name: Deploy to Kubernetes cluster
+#       run: |
+#         kubectl apply -f k8s.yml --validate=false
+
+name: CI-CD
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Authenticate to Google Cloud
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+
+      # Configure Docker to use gcloud as a credential helper
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+
+      # Build and push Docker images to GCR with both latest and run_number tags
+      - name: Build and Push Docker Images to GCR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            gcr.io/semiotic-joy-438622-r2/api-website:latest
+            gcr.io/semiotic-joy-438622-r2/api-website:${{ github.run_number }}
+
+  CD:
+    runs-on: ubuntu-latest
+    needs: [CI]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Authenticate to Google Cloud
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+
+      # Get GKE credentials
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: cluster-1
+          location: us-central1-c
+          project_id: semiotic-joy-438622-r2
+
+      # Deploy to Kubernetes cluster
+      - name: Deploy to GKE
+        run: kubectl apply -f deployment.yaml --validate=false

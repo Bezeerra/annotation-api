@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-app-deployment
+  name: api-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: api-app
@@ -14,30 +14,13 @@ spec:
     spec:
       containers:
         - name: api-app
-          image: api-app:latest
-          imagePullPolicy: IfNotPresent
+          image: 'gcr.io/semiotic-joy-438622-r2/api-website:latest'
           ports:
             - containerPort: 8000
-          env:
-            - name: POSTGRES_USER
-              value: "host"
-            - name: POSTGRES_PASSWORD
-              value: "test"
-            - name: POSTGRES_PORT
-              value: "5432"
-            - name: POSTGRES_HOST
-              value: "SET IP"
-            - name: POSTGRES_DB
-              value: "main"
-            - name: debug_mode
-              value: "true"
-            - name: REDIS_PASSWORD
-              value: "test"
-            - name: REDIS_PORT
-              value: "6379"
-            - name: REDIS_HOST
-              value: "SET IP"
-
+          envFrom:
+            - configMapRef:
+                name: config-map-api-website
+      restartPolicy: Always  # Ensure restartPolicy is Always for Deployments
 
 ---
 apiVersion: v1
@@ -50,5 +33,6 @@ spec:
     app: api-app
   ports:
     - protocol: TCP
-      port: 8000
+      name: http-svc
+      port: 80
       targetPort: 8000

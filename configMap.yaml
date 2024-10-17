@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map-api-website
+data:
+  POSTGRES_USER: "postgres-integration"
+  POSTGRES_PASSWORD: "postgres-integration"
+  POSTGRES_PORT: "5432"  # Ports are typically strings in ConfigMap
+  POSTGRES_DB: "postgres-integration"
+  POSTGRES_HOST: "172.27.176.3"
+  REDIS_HOST: "10.0.3.2"
+  REDIS_PORT: "6379"  # Ports are typically strings in ConfigMap
+  REDIS_PASSWORD: ""
