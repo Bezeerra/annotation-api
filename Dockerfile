@@ -13,5 +13,5 @@ COPY . /app
 RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 # RUN APP
-EXPOSE 8000
+EXPOSE 8080
 CMD poetry run python3 run_app.py
