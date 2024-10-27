@@ -128,6 +128,7 @@
 #          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
 #
 #
+      - uses: actions/checkout@v4
 #  Used that if you want to create the pods in cluster -> is very expensive
 #      # Get GKE credentials
 #      - name: Get GKE credentials
