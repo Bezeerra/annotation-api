@@ -102,19 +102,19 @@ jobs:
           credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
 
       # Configure Docker to use gcloud as a credential helper
-      - name: Configure Docker for GCR
-        run: gcloud auth configure-docker
-
-      # Build and push Docker images to GCR with both latest and run_number tags
-      - name: Build and Push Docker Images to GCR
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: |
-            gcr.io/semiotic-joy-438622-r2/api-website:latest
-            gcr.io/semiotic-joy-438622-r2/api-website:${{ github.run_number }}
+#      - name: Configure Docker for GCR
+#        run: gcloud auth configure-docker
+#
+#      # Build and push Docker images to GCR with both latest and run_number tags
+#      - name: Build and Push Docker Images to GCR
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: .
+#          file: Dockerfile
+#          push: true
+#          tags: |
+#            gcr.io/semiotic-joy-438622-r2/api-website:latest
+#            gcr.io/semiotic-joy-438622-r2/api-website:${{ github.run_number }}
 
   CD:
     runs-on: ubuntu-latest
@@ -128,14 +128,16 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
 
-      # Get GKE credentials
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v1
-        with:
-          cluster_name: cluster-1
-          location: us-central1-c
-          project_id: semiotic-joy-438622-r2
 
-      # Deploy to Kubernetes cluster
-      - name: Deploy to GKE
-        run: kubectl apply -f deployment.yaml --validate=false
+#  Used that if you want to create the pods in cluster -> is very expensive
+#      # Get GKE credentials
+#      - name: Get GKE credentials
+#        uses: google-github-actions/get-gke-credentials@v1
+#        with:
+#          cluster_name: cluster-1
+#          location: us-central1-c
+#          project_id: semiotic-joy-438622-r2
+#
+#      # Deploy to Kubernetes cluster
+#      - name: Deploy to GKE
+#        run: kubectl apply -f deployment.yaml --validate=false
