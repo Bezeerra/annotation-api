@@ -83,52 +83,71 @@
 #     - name: Deploy to Kubernetes cluster
 #       run: |
 #         kubectl apply -f k8s.yml --validate=false
-#name: CI-CD
-#
-#on:
-#  push:
-#    branches: ["main"]
-#
-#jobs:
-#  CI:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      # Autenticar no Google Cloud
-#      - uses: google-github-actions/auth@v1
-#        with:
-#          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-#
-#      # Configurar o Docker para usar o gcloud como auxiliar de credenciais
-#      - name: Configurar Docker para GCR
-#        run: gcloud auth configure-docker
-#
-#      # Construir e enviar imagens Docker para o GCR com as tags latest e run_number
-#      - name: Construir e enviar imagens Docker para o GCR
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: .
-#          file: Dockerfile
-#          push: true
-#          tags: |
-#            gcr.io/semiotic-joy-438622-r2/api-website:latest
-#            gcr.io/semiotic-joy-438622-r2/api-website:${{ github.run_number }}
-#
-#  CD:
-#    runs-on: ubuntu-latest
-#    needs: [CI]
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      # Autenticar no Google Cloud
-#      - uses: google-github-actions/auth@v1
-#        with:
-#          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
-#
-#
+name: CI-CD
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v4
+
+      # Autenticar no Google Cloud
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+
+      # Configurar o Docker para usar o gcloud como auxiliar de credenciais
+      - name: Configurar Docker para GCR
+        run: gcloud auth configure-docker
+
+      # Construir e enviar imagens Docker para o GCR com as tags latest e run_number
+      - name: Construir e enviar imagens Docker para o GCR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            gcr.io/semiotic-joy-438622-r2/api-website:latest
+            gcr.io/semiotic-joy-438622-r2/api-website:${{ github.run_number }}
+
+  CD:
+    runs-on: ubuntu-latest
+    needs: [CI]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Autenticar no Google Cloud
+      - uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}'
+
+      # Implantar no Cloud Run
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: api-website
+          image: gcr.io/semiotic-joy-438622-r2/api-website:latest
+          region: us-central1
+          platform: managed
+          allow-unauthenticated: true
+          vpc-connector: my-new-vpc-connector
+          vpc-egress: all-traffic
+          env_vars: |
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }},
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }},
+            POSTGRES_HOST=${{ secrets.POSTGRES_HOST }},
+            POSTGRES_PORT=${{ secrets.POSTGRES_PORT }},
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }},
+            REDIS_HOST=${{ secrets.REDIS_HOST }},
+            REDIS_PORT=${{ secrets.REDIS_PORT }},
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
 #  Used that if you want to create the pods in cluster -> is very expensive
 #      # Get GKE credentials
 #      - name: Get GKE credentials
